@@ -5,47 +5,45 @@
 #include <android_native_app_glue.h>
 #include <jni.h>
 
+#include "Layer.h"
 #include "Render.h"
 #include "Logger.h"
 
+struct AppData {
+    bool isPause = false;
+    Render* render = nullptr;
+    Layer* layer = new Layer();
+};
+
 static int32_t handle_input(struct android_app* app, AInputEvent* event) {
-    if (app->userData) {
-        auto *render = reinterpret_cast<Render*>(app->userData);
-        render->handleInput(event);
+    auto *appData = reinterpret_cast<AppData*>(app->userData);
+    if (!appData->isPause) {
+        appData->render->handleInput(event);
     }
     return 0;
 }
 
 static void handle_cmd(struct android_app *app, int32_t cmd) {
+    auto *appData = reinterpret_cast<AppData*>(app->userData);
     switch (cmd) {
         case APP_CMD_INIT_WINDOW: {
             LOGI("APP_CMD_INIT_WINDOW")
-            app->userData = new Render(app);
+            appData->render = new Render(app,appData->layer);
             break;
         }
         case APP_CMD_TERM_WINDOW: {
             LOGI("APP_CMD_TERM_WINDOW")
-            if (app->userData) {
-                auto *render = reinterpret_cast<Render*>(app->userData);
-                app->userData = nullptr;
-                delete render;
-            }
+            delete appData->render;
             break;
         }
         case APP_CMD_RESUME: {
             LOGI("APP_CMD_RESUME")
-            if (app->userData) {
-                auto *render = reinterpret_cast<Render*>(app->userData);
-                render->isPause = false;
-            }
+            appData->isPause = false;
             break;
         }
         case APP_CMD_PAUSE: {
             LOGI("APP_CMD_PAUSE")
-            if (app->userData) {
-                auto *render = reinterpret_cast<Render*>(app->userData);
-                render->isPause = true;
-            }
+            appData->isPause = true;
             break;
         }
         case APP_CMD_STOP: {
@@ -65,6 +63,9 @@ void android_main(struct android_app *app) {
     LOGI("Welcome to android_main")
     app->onAppCmd = handle_cmd;
     app->onInputEvent = handle_input;
+    AppData appData{};
+    appData.layer->layers.push_back(new BackgroundLayer());
+    app->userData = &appData;
 
     // 循环等待要做的事情。
     while (!app->destroyRequested) {
@@ -77,10 +78,9 @@ void android_main(struct android_app *app) {
             }
         }
         // do app something
-        if (app->userData) {
-            auto *pRenderer = reinterpret_cast<Render *>(app->userData);
+        if (!appData.isPause && appData.render != nullptr) {
             // Render a frame
-            pRenderer->render();
+            appData.render->render();
         }
     }
 }

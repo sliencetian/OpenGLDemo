@@ -105,10 +105,7 @@ Render::~Render() {
 }
 
 void Render::handleInput(AInputEvent *event) {
-    if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
-        state.x = AMotionEvent_getX(event, 0);
-        state.y = AMotionEvent_getY(event, 0);
-    }
+    layer_->handleInput(event);
 }
 
 void Render::render() {
@@ -116,15 +113,6 @@ void Render::render() {
         LOGI("No display.")
         return;
     }
-    if (isPause) {
-        LOGI("is pause")
-        return;
-    }
-
-    // Just fill the screen with a color.
-    glClearColor(state.x / (float) width_, state.angle, state.y / (float) height_, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
+    layer_->draw(width_,height_);
     eglSwapBuffers(display_, surface_);
-
 }

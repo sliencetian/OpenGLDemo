@@ -7,19 +7,13 @@
 
 #include <android_native_app_glue.h>
 #include <EGL/egl.h>
-
-struct android_app;
-
-struct saved_state {
-    float angle;
-    float x;
-    float y;
-};
+#include "Layer.h"
 
 class Render {
 public:
 
-    inline Render(android_app *pApp) :
+    inline Render(android_app *pApp,Layer *layer) :
+            layer_(layer),
             app_(pApp),
             display_(EGL_NO_DISPLAY),
             surface_(EGL_NO_SURFACE),
@@ -39,16 +33,13 @@ private:
 
     void initRenderer();
 
+    Layer *layer_;
     android_app *app_;
     EGLDisplay display_;
     EGLSurface surface_;
     EGLContext context_;
     EGLint width_;
     EGLint height_;
-
-public:
-    bool isPause = false;
-    saved_state state;
 
 };
 

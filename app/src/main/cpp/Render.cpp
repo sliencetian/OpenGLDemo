@@ -113,6 +113,7 @@ void Render::render() {
         LOGI("No display.")
         return;
     }
-    layer_->draw(width_,height_);
+    glViewport(0,0,width_,height_);
+    layer_->draw(this);
     eglSwapBuffers(display_, surface_);
 }

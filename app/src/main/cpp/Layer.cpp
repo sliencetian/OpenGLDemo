@@ -4,15 +4,17 @@
 
 #include "Layer.h"
 
+#include "Render.h"
+
 void Layer::handleInput(AInputEvent *event) {
     std::for_each(layers.begin(), layers.end(), [&](Layer *layer) {
         layer->handleInput(event);
     });
 }
 
-void Layer::draw(EGLint width, EGLint height) {
+void Layer::draw(Render *render) {
     std::for_each(layers.begin(), layers.end(), [&](Layer *layer) {
-        layer->draw(width, height);
+        layer->draw(render);
     });
 }
 
@@ -23,6 +25,14 @@ Layer::~Layer() {
     layers.clear();
 }
 
+void TemplateLayer::draw(Render *render) {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void TemplateLayer::handleInput(AInputEvent *event) {
+}
+
 void BackgroundLayer::handleInput(AInputEvent *event) {
     if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
         state.x = AMotionEvent_getX(event, 0);
@@ -30,7 +40,24 @@ void BackgroundLayer::handleInput(AInputEvent *event) {
     }
 }
 
-void BackgroundLayer::draw(EGLint width, EGLint height) {
-    glClearColor(state.x / (float) width, state.angle, state.y / (float) height, 1);
+void BackgroundLayer::draw(Render *render) {
+    glClearColor(state.x / (float) render->width_,
+                 state.angle,
+                 state.y / (float) render->height_,
+                 1);
     glClear(GL_COLOR_BUFFER_BIT);
+}
+
+
+void TriangleLayer::draw(Render *render) {
+    // 绘制物体
+    init();
+    render->shader_->use();
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
+}
+
+void TriangleLayer::handleInput(AInputEvent *event) {
+
 }

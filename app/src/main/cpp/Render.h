@@ -8,11 +8,12 @@
 #include <android_native_app_glue.h>
 #include <EGL/egl.h>
 #include "Layer.h"
+#include "Shader.h"
 
 class Render {
 public:
 
-    inline Render(android_app *pApp,Layer *layer) :
+    inline Render(android_app *pApp, Layer *layer) :
             layer_(layer),
             app_(pApp),
             display_(EGL_NO_DISPLAY),
@@ -21,11 +22,12 @@ public:
             width_(0),
             height_(0) {
         initRenderer();
+        shader_ = new Shader();
     }
 
     virtual ~Render();
 
-    void handleInput(AInputEvent* event);
+    void handleInput(AInputEvent *event);
 
     void render();
 
@@ -38,8 +40,11 @@ private:
     EGLDisplay display_;
     EGLSurface surface_;
     EGLContext context_;
+
+public:
     EGLint width_;
     EGLint height_;
+    Shader *shader_;
 
 };
 

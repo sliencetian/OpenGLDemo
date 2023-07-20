@@ -61,11 +61,16 @@ static void handle_cmd(struct android_app *app, int32_t cmd) {
 
 void android_main(struct android_app *app) {
     LOGI("Welcome to android_main")
+    AppData appData{};
+    // 添加渲染的 layer
+    appData.layer->layers.push_back(new TemplateLayer());
+    appData.layer->layers.push_back(new BackgroundLayer());
+    appData.layer->layers.push_back(new TriangleLayer());
+    // 保存当前数据
+    app->userData = &appData;
+
     app->onAppCmd = handle_cmd;
     app->onInputEvent = handle_input;
-    AppData appData{};
-    appData.layer->layers.push_back(new BackgroundLayer());
-    app->userData = &appData;
 
     // 循环等待要做的事情。
     while (!app->destroyRequested) {

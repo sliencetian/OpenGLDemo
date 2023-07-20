@@ -120,7 +120,6 @@ void Render::render() {
         LOGI("is pause")
         return;
     }
-    LOGI("render")
 
     // Just fill the screen with a color.
     glClearColor(state.x / (float) width_, state.angle, state.y / (float) height_, 1);

@@ -6,6 +6,8 @@
 #include <jni.h>
 #include "Logger.h"
 
+#include "Render.h"
+
 static int32_t handle_input(struct android_app* app, AInputEvent* event) {
     return 0;
 }
@@ -14,10 +16,21 @@ static void handle_cmd(struct android_app *app, int32_t cmd) {
 
     switch (cmd) {
         case APP_CMD_INIT_WINDOW: {
+            LOGI("APP_CMD_INIT_WINDOW")
+            if (!app->userData) {
+                app->userData = new Render(app);
+            } else {
+                auto render = reinterpret_cast<Render*>(app->userData);
+                render->initSurface(app);
+            }
             break;
         }
         case APP_CMD_TERM_WINDOW: {
             LOGI("APP_CMD_TERM_WINDOW")
+            if (app->userData) {
+                auto render = reinterpret_cast<Render*>(app->userData);
+                render->destroySurface();
+            }
             break;
         }
         case APP_CMD_RESUME: {
@@ -34,6 +47,11 @@ static void handle_cmd(struct android_app *app, int32_t cmd) {
         }
         case APP_CMD_DESTROY: {
             LOGI("APP_CMD_DESTROY")
+            if (app->userData) {
+                auto render = reinterpret_cast<Render*>(app->userData);
+                delete render;
+                app->userData = nullptr;
+            }
             break;
         }
         default:
@@ -56,6 +74,10 @@ void android_main(struct android_app *app) {
             if (source) {
                 source->process(app, source);
             }
+        }
+        if (app->userData) {
+            auto render = reinterpret_cast<Render*>(app->userData);
+            render->render();
         }
     }
 }

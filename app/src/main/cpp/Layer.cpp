@@ -49,12 +49,35 @@ void BackgroundLayer::draw(Render *render) {
 }
 
 
+
 void TriangleLayer::draw(Render *render) {
     // 绘制物体
     init();
     render->shader_->use();
+
+    // 更新uniform颜色
+    color[0] = color[0] + dis;
+    color[1] = color[1] + dis;
+    if (color[1] >= 1.0f) {
+        color[0] = 1.0f;
+        color[1] = 1.0f;
+        dis = -0.005f;
+    } else if (color[1] <= 0.0f) {
+        color[0] = 0.0f;
+        color[1] = 0.0f;
+        dis = 0.005f;
+    }
+//    int vertexColorLocation = render->shader_->getUniformLocation("ourColor");
+//    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+//    glUniform4f(vertexColorLocation, color[0], color[1], color[2], color[3]);
+//    glUniform4fv(vertexColorLocation,0,color);
+//    glUniform4fv(vertexColorLocation,1,color);
+    render->shader_->setFloat("ourColor",0,color);
+    render->shader_->setFloat("ourColor",1,color);
+
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+//    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 

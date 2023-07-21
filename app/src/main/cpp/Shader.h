@@ -11,7 +11,7 @@
 
 class Shader {
 private:
-    unsigned int id = -1;
+    unsigned int shaderProgram = -1;
 
 public:
 
@@ -20,11 +20,15 @@ public:
     }
 
     ~Shader() {
-        glDeleteProgram(id);
+        glDeleteProgram(shaderProgram);
     }
 
     void use() {
-        glUseProgram(id);
+        glUseProgram(shaderProgram);
+    }
+
+    void setFloat(const GLchar *name,const GLsizei count, const GLfloat *value) {
+        glUniform4fv(glGetUniformLocation(shaderProgram, name),count,value);
     }
 
 private:
@@ -53,9 +57,10 @@ private:
         const char *fragmentShaderSource = "#version 300 es                              \n"
                                            "precision mediump float;                     \n"
                                            "out vec4 fragColor;                          \n"
+                                           "uniform vec4 ourColor;                       \n"
                                            "void main()                                  \n"
                                            "{                                            \n"
-                                           "   fragColor = vec4 ( 1.0f,0.5f,0.2f,1.0f);  \n"
+                                           "   fragColor = ourColor;  \n"
                                            "}                                            \n";
         LOGI("fragmentShaderSource = %s",fragmentShaderSource)
         unsigned int fragmentShader;
@@ -70,14 +75,14 @@ private:
         }
 
         //着色器程序
-        id = glCreateProgram();
-        glAttachShader(id, vertexShader);
-        glAttachShader(id, fragmentShader);
-        glLinkProgram(id);
-        glGetProgramiv(id, GL_LINK_STATUS, &success);
+        shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
         if (!success) {
             char infoLog[512];
-            glGetProgramInfoLog(id, 521, NULL, infoLog);
+            glGetProgramInfoLog(shaderProgram, 521, NULL, infoLog);
             LOGI("glLinkProgram error = %s", infoLog)
         }
 
@@ -85,7 +90,7 @@ private:
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         LOGI("shader init success , shader=%d , vertexShader=%d , fragmentShader=%d",
-             id, vertexShader, fragmentShader)
+             shaderProgram, vertexShader, fragmentShader)
     }
 
 };

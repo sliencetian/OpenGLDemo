@@ -15,29 +15,36 @@ public:
 
     inline Render(android_app *pApp, Layer *layer) :
             layer_(layer),
-            app_(pApp),
             display_(EGL_NO_DISPLAY),
             surface_(EGL_NO_SURFACE),
             context_(EGL_NO_CONTEXT),
             width_(0),
             height_(0) {
-        initRenderer();
+        initRenderer(pApp);
         shader_ = new Shader();
     }
 
     virtual ~Render();
 
+    void initSurface(android_app *pApp);
+
+    void destroySurface();
+
     void handleInput(AInputEvent *event);
 
     void render();
 
+    Shader* getShader() const {
+        return shader_;
+    }
+
 private:
 
-    void initRenderer();
+    void initRenderer(android_app *pApp);
 
     Layer *layer_;
-    android_app *app_;
     EGLDisplay display_;
+    EGLConfig config_;
     EGLSurface surface_;
     EGLContext context_;
 

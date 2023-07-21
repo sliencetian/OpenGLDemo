@@ -7,7 +7,7 @@
 #include "Render.h"
 #include "Logger.h"
 
-void Render::initRenderer() {
+void Render::initRenderer(android_app *pApp) {
     LOGI("initRenderer !")
     // 选择您的渲染属性
     constexpr EGLint attribs[] = {
@@ -34,7 +34,7 @@ void Render::initRenderer() {
     // 找到我们喜欢的配置。
     // 如果我们不关心配置中的其他任何内容，可能会只获取第一个。
     // 否则就加入你自己的启发式
-    EGLConfig config = *std::find_if(
+    config_ = *std::find_if(
             supportedConfigs.get(),
             supportedConfigs.get() + numConfigs,
             [&display](const EGLConfig &config) {
@@ -54,38 +54,42 @@ void Render::initRenderer() {
                 return false;
             }
     );
-
-    LOGI("Found %d Configs", numConfigs);
-    // 创建合适的 window surface
-    EGLint format;
-    eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
-    EGLSurface surface = eglCreateWindowSurface(display, config, app_->window, nullptr);
+    LOGI("Found %d Configs", numConfigs)
 
     // 创建 GLES 3 上下文
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
-    EGLContext context = eglCreateContext(display, config, nullptr, contextAttribs);
-
-    //获取一些窗口指标
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        LOGW("Unable to eglMakeCurrent");
-        return;
-    }
-
-    eglQuerySurface(display, surface, EGL_WIDTH, &width_);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &height_);
-    LOGI("QuerySurface : width = %d , height = %d", width_, height_);
-
+    EGLContext context = eglCreateContext(display, config_, nullptr, contextAttribs);
     display_ = display;
-    surface_ = surface;
     context_ = context;
-
     // 检查系统上的 openGL
     auto opengl_info = {GL_VENDOR, GL_RENDERER, GL_VERSION, GL_EXTENSIONS};
     for (auto name: opengl_info) {
         auto info = glGetString(name);
         LOGI("OpenGL Info: %s", info);
     }
+    initSurface(pApp);
     LOGI("init completed!")
+
+}
+
+void Render::initSurface(android_app *pApp) {
+    // 创建合适的 window surface
+    surface_ = eglCreateWindowSurface(display_, config_, pApp->window, nullptr);
+    //获取一些窗口指标
+    if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE) {
+        LOGW("Unable to eglMakeCurrent")
+        return;
+    }
+    eglQuerySurface(display_, surface_, EGL_WIDTH, &width_);
+    eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
+    LOGI("QuerySurface : width = %d , height = %d", width_, height_)
+}
+
+void Render::destroySurface() {
+    if (surface_ != EGL_NO_SURFACE) {
+        eglDestroySurface(display_, surface_);
+        surface_ = EGL_NO_SURFACE;
+    }
 }
 
 Render::~Render() {

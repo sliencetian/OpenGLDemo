@@ -55,8 +55,10 @@ class TriangleLayer : public Layer {
     void draw(Render *render);
 
 private:
-    unsigned int VBO = 0, VAO = 0;
+    unsigned int VBO = 0, VAO = 0 , VEO = 0;
     bool isInit = false;
+    float* color = new float [0.0f,0.0f,0.0f,1.f];
+    float dis = 0.005f;
 
     void init() {
         if (isInit) {
@@ -65,19 +67,30 @@ private:
         isInit = true;
         // 初始化代码（只运行一次 (除非你的物体频繁改变)）
         float vertices[] = {
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.0f, 0.5f, 0.0f
+                0.5f, 0.5f, 0.0f,   // 右上角
+                0.5f, -0.5f, 0.0f,  // 右下角
+                -0.5f, -0.5f, 0.0f, // 左下角
+                -0.5f, 0.5f, 0.0f   // 左上角
         };
-        //创建 VAO,VBO
+        unsigned int indices[] = {
+                // 注意索引从0开始!
+                // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
+                // 这样可以由下标代表顶点组合成矩形
+                0, 1, 3, // 第一个三角形
+                1, 2, 3  // 第二个三角形
+        };
+        //创建 VAO,VBO,VEO
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VEO);
         // 绑定VAO
         glBindVertexArray(VAO);
-        // 绑定缓冲
+        // 绑定缓冲,填充数据,把顶点数组复制到缓冲中供OpenGL使用
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        // 填充数据,把顶点数组复制到缓冲中供OpenGL使用
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // 绑定索引，填充索引数据
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VEO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),indices,GL_STATIC_DRAW);
         // 设置顶点属性指针
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
@@ -88,6 +101,11 @@ private:
 
 public:
     TriangleLayer() {
+    }
+    ~TriangleLayer(){
+        glDeleteBuffers(1,&VAO);
+        glDeleteBuffers(1,&VBO);
+        glDeleteBuffers(1,&VEO);
     }
 
 };

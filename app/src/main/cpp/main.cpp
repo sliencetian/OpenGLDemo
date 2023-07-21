@@ -28,12 +28,18 @@ static void handle_cmd(struct android_app *app, int32_t cmd) {
     switch (cmd) {
         case APP_CMD_INIT_WINDOW: {
             LOGI("APP_CMD_INIT_WINDOW")
-            appData->render = new Render(app,appData->layer);
+            if (appData->render) {
+                appData->render->initSurface(app);
+            } else {
+                appData->render = new Render(app,appData->layer);
+            }
             break;
         }
         case APP_CMD_TERM_WINDOW: {
             LOGI("APP_CMD_TERM_WINDOW")
-            delete appData->render;
+            if (appData->render) {
+                appData->render->destroySurface();
+            }
             break;
         }
         case APP_CMD_RESUME: {
@@ -52,6 +58,7 @@ static void handle_cmd(struct android_app *app, int32_t cmd) {
         }
         case APP_CMD_DESTROY: {
             LOGI("APP_CMD_DESTROY")
+            delete appData->render;
             break;
         }
         default:

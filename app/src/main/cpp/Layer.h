@@ -125,10 +125,10 @@ private:
         // 初始化代码（只运行一次 (除非你的物体频繁改变)）
         float vertices[] = {
         //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
-                0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
-                0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
-                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
-                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
+                0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,   // 右上
+                0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,   // 右下
+                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   // 左下
+                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 0.0f    // 左上
         };
         unsigned int indices[] = {
                 // 注意索引从0开始!
@@ -159,7 +159,7 @@ private:
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
         //创建纹理
-        texture = loadTexture(render->app,"container.jpg");
+        texture = loadTexture(render->app,"1.jpeg");
 
         // 解绑
         glBindBuffer(GL_ARRAY_BUFFER,0);

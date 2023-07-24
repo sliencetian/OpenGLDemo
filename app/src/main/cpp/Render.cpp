@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <GLES3/gl3.h>
 #include "Render.h"
+#include "Layer.h"
 #include "Logger.h"
 
 void Render::initRenderer(android_app *pApp) {

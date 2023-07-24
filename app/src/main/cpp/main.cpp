@@ -73,6 +73,7 @@ void android_main(struct android_app *app) {
     appData.layer->layers.push_back(new TemplateLayer());
     appData.layer->layers.push_back(new BackgroundLayer());
     appData.layer->layers.push_back(new TriangleLayer());
+    appData.layer->layers.push_back(new TextureLayer());
     // 保存当前数据
     app->userData = &appData;
 

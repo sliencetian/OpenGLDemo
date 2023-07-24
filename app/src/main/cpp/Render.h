@@ -7,13 +7,15 @@
 
 #include <android_native_app_glue.h>
 #include <EGL/egl.h>
-#include "Layer.h"
 #include "Shader.h"
+
+class Layer;
 
 class Render {
 public:
 
     inline Render(android_app *pApp, Layer *layer) :
+            app(pApp),
             layer_(layer),
             display_(EGL_NO_DISPLAY),
             surface_(EGL_NO_SURFACE),
@@ -52,6 +54,7 @@ public:
     EGLint width_;
     EGLint height_;
     Shader *shader_;
+    android_app *app;
 
 };
 

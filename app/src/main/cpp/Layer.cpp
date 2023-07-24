@@ -14,6 +14,10 @@ void Layer::handleInput(AInputEvent *event) {
 
 void Layer::draw(Render *render) {
     std::for_each(layers.begin(), layers.end(), [&](Layer *layer) {
+        if (!layer->isInit) {
+            layer->isInit = true;
+            layer->init(render);
+        }
         layer->draw(render);
     });
 }
@@ -29,7 +33,6 @@ void TemplateLayer::draw(Render *render) {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
-
 void TemplateLayer::handleInput(AInputEvent *event) {
 }
 
@@ -39,7 +42,6 @@ void BackgroundLayer::handleInput(AInputEvent *event) {
         state.y = AMotionEvent_getY(event, 0);
     }
 }
-
 void BackgroundLayer::draw(Render *render) {
     glClearColor(state.x / (float) render->width_,
                  state.angle,
@@ -52,8 +54,8 @@ void BackgroundLayer::draw(Render *render) {
 
 void TriangleLayer::draw(Render *render) {
     // 绘制物体
-    init();
-    render->shader_->use();
+    render->shader_->useTriangleShader();
+    glBindVertexArray(VAO);
 
     // 更新uniform颜色
     color[0] = color[0] + dis;
@@ -75,12 +77,29 @@ void TriangleLayer::draw(Render *render) {
     render->shader_->setFloat("ourColor",0,color);
     render->shader_->setFloat("ourColor",1,color);
 
-    glBindVertexArray(VAO);
 //    glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
     glBindVertexArray(0);
+    render->shader_->unUse();
 }
 
 void TriangleLayer::handleInput(AInputEvent *event) {
 
+}
+
+void TextureLayer::handleInput(AInputEvent *event) {
+}
+
+void TextureLayer::draw(Render *render) {
+    // 绘制物体
+    render->shader_->useTextureShader();
+    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindVertexArray(VAO);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    render->shader_->unUse();
 }

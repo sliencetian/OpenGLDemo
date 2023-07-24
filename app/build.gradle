@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.example.opengldemo"
     compileSdk = 33
+    ndkVersion "25.1.8937393"
 
     defaultConfig {
         applicationId = "com.example.opengldemo"

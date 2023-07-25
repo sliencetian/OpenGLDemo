@@ -54,7 +54,7 @@ void BackgroundLayer::draw(Render *render) {
 
 void TriangleLayer::draw(Render *render) {
     // 绘制物体
-    render->shader_->useTriangleShader();
+    shader->use();
     glBindVertexArray(VAO);
 
     // 更新uniform颜色
@@ -74,14 +74,14 @@ void TriangleLayer::draw(Render *render) {
 //    glUniform4f(vertexColorLocation, color[0], color[1], color[2], color[3]);
 //    glUniform4fv(vertexColorLocation,0,color);
 //    glUniform4fv(vertexColorLocation,1,color);
-    render->shader_->setFloat("ourColor",0,color);
-    render->shader_->setFloat("ourColor",1,color);
+    shader->setFloat("ourColor",0,color);
+    shader->setFloat("ourColor",1,color);
 
 //    glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
-    render->shader_->unUse();
+    shader->unUse();
 }
 
 void TriangleLayer::handleInput(AInputEvent *event) {
@@ -93,7 +93,7 @@ void TextureLayer::handleInput(AInputEvent *event) {
 
 void TextureLayer::draw(Render *render) {
     // 绘制物体
-    render->shader_->useTextureShader();
+    shader->use();
     glBindTexture(GL_TEXTURE_2D,texture);
     glBindVertexArray(VAO);
 
@@ -101,5 +101,22 @@ void TextureLayer::draw(Render *render) {
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
-    render->shader_->unUse();
+    shader->unUse();
+}
+
+void CubeLayer::handleInput(AInputEvent *event) {
+
+}
+
+void CubeLayer::draw(Render *render) {
+    // 绘制物体
+    shader->use();
+    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindVertexArray(VAO);
+
+    glDrawArrays(GL_TRIANGLES,0,36);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    shader->unUse();
 }

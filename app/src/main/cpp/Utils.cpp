@@ -23,6 +23,7 @@ unsigned int loadTexture(struct android_app *app, const char *path) {
     int width, height, nrChannels;
     //stbi_set_flip_vertically_on_load(true);
     // load图片
+    stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load_from_memory(fileData, assetLength,
                                                 &width, &height, &nrChannels, 0);
     if (data) {
@@ -41,4 +42,12 @@ unsigned int loadTexture(struct android_app *app, const char *path) {
     }
     stbi_image_free(data);
     return textureID;
+}
+
+char* loadAssetFile(AAssetManager *assetManager, const char *path) {
+    // 打开 Asset 文件夹下的文件
+    AAsset *pathAsset = AAssetManager_open(assetManager, path, AASSET_MODE_UNKNOWN);
+    // 获得文件对应的 Buffer
+    auto *fileData = (char *) AAsset_getBuffer(pathAsset);
+    return fileData;
 }

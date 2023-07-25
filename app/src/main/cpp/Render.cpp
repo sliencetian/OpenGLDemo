@@ -60,6 +60,7 @@ void Render::initRenderer(android_app *pApp) {
     // 创建 GLES 3 上下文
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
     EGLContext context = eglCreateContext(display, config_, nullptr, contextAttribs);
+
     display_ = display;
     context_ = context;
     // 检查系统上的 openGL

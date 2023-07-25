@@ -6,10 +6,13 @@
 #define OPENGLDEMO_SHADER_H
 
 #include <EGL/egl.h>
+#include <string>
+#include <assert.h>
 
 #include "android_native_app_glue.h"
 #include "Logger.h"
 #include "Utils.h"
+#include "glm/glm.hpp"
 
 class Shader {
 private:
@@ -29,12 +32,20 @@ public:
         glUseProgram(shaderProgram);
     }
 
+    GLint getUniformLocation (const GLchar *name) const {
+        return glGetUniformLocation(shaderProgram, name);
+    }
+
     void unUse() {
         glUseProgram(0);
     }
 
     void setFloat(const GLchar *name,const GLsizei count, const GLfloat *value) {
         glUniform4fv(glGetUniformLocation(shaderProgram, name),count,value);
+    }
+
+    void setMat4(const GLchar *name, const glm::mat4 &mat) const {
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
     }
 
 private:
@@ -44,7 +55,7 @@ private:
         // 顶点着色器
         unsigned int vertexShader;
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexCode, NULL);
+        glShaderSource(vertexShader, 1, &vertexCode, nullptr);
         glCompileShader(vertexShader);
         int success;
         glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
@@ -53,12 +64,13 @@ private:
             glGetShaderInfoLog(vertexShader, 521, NULL, infoLog);
             LOGI("Compile Shader error = %s", infoLog)
         }
+        assert(success);
         // 片段着色器
         auto fragmentCode = loadAssetFile(assetManager,fragmentPath);
         LOGI("fragmentCode = %s",fragmentCode)
         unsigned int fragmentShader;
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentCode, NULL);
+        glShaderSource(fragmentShader, 1, &fragmentCode, nullptr);
         glCompileShader(fragmentShader);
         glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
         if (!success) {
@@ -77,6 +89,7 @@ private:
             glGetProgramInfoLog(shaderProgram, 521, NULL, infoLog);
             LOGI("glLinkProgram error = %s", infoLog)
         }
+        assert(success);
         // 把着色器对象链接到程序对象以后，记得删除着色器对象，我们不再需要它们了
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);

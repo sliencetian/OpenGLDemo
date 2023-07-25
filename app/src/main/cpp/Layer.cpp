@@ -5,6 +5,9 @@
 #include "Layer.h"
 
 #include "Render.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 void Layer::handleInput(AInputEvent *event) {
     std::for_each(layers.begin(), layers.end(), [&](Layer *layer) {
@@ -110,8 +113,33 @@ void CubeLayer::handleInput(AInputEvent *event) {
 
 void CubeLayer::draw(Render *render) {
     // 绘制物体
+
+    // 开启深度测试
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     shader->use();
     glBindTexture(GL_TEXTURE_2D,texture);
+    glBindVertexArray(VAO);
+
+    // 创造转变
+    glm::mat4 model         = glm::mat4(1.0f); //确保首先将矩阵初始化为单位矩阵
+    glm::mat4 view          = glm::mat4(1.0f);
+    glm::mat4 projection    = glm::mat4(1.0f);
+    angle += dis;
+    model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+    view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    projection = glm::perspective(glm::radians(45.0f), (float)render->width_ / (float)render->height_, 0.1f, 100.0f);
+    // 检索矩阵统一位置
+    GLint modelLoc = shader->getUniformLocation("model");
+    GLint viewLoc  = shader->getUniformLocation("view");
+    // 将它们传递给着色器（3 种不同的方式）
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+    // 注意：目前我们每帧设置投影矩阵，但由于投影矩阵很少改变，因此最佳实践通常是仅将其设置在主循环之外一次。
+    shader->setMat4("projection", projection);
+
+    // 渲染框
     glBindVertexArray(VAO);
 
     glDrawArrays(GL_TRIANGLES,0,36);

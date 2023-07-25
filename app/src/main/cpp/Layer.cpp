@@ -5,6 +5,9 @@
 #include "Layer.h"
 
 #include "Render.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 void Layer::handleInput(AInputEvent *event) {
     std::for_each(layers.begin(), layers.end(), [&](Layer *layer) {
@@ -54,7 +57,7 @@ void BackgroundLayer::draw(Render *render) {
 
 void TriangleLayer::draw(Render *render) {
     // 绘制物体
-    render->shader_->useTriangleShader();
+    shader->use();
     glBindVertexArray(VAO);
 
     // 更新uniform颜色
@@ -74,14 +77,14 @@ void TriangleLayer::draw(Render *render) {
 //    glUniform4f(vertexColorLocation, color[0], color[1], color[2], color[3]);
 //    glUniform4fv(vertexColorLocation,0,color);
 //    glUniform4fv(vertexColorLocation,1,color);
-    render->shader_->setFloat("ourColor",0,color);
-    render->shader_->setFloat("ourColor",1,color);
+    shader->setFloat("ourColor",0,color);
+    shader->setFloat("ourColor",1,color);
 
 //    glDrawArrays(GL_TRIANGLES, 0, 3);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
-    render->shader_->unUse();
+    shader->unUse();
 }
 
 void TriangleLayer::handleInput(AInputEvent *event) {
@@ -93,7 +96,7 @@ void TextureLayer::handleInput(AInputEvent *event) {
 
 void TextureLayer::draw(Render *render) {
     // 绘制物体
-    render->shader_->useTextureShader();
+    shader->use();
     glBindTexture(GL_TEXTURE_2D,texture);
     glBindVertexArray(VAO);
 
@@ -101,5 +104,47 @@ void TextureLayer::draw(Render *render) {
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D,0);
-    render->shader_->unUse();
+    shader->unUse();
+}
+
+void CubeLayer::handleInput(AInputEvent *event) {
+
+}
+
+void CubeLayer::draw(Render *render) {
+    // 绘制物体
+
+    // 开启深度测试
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    shader->use();
+    glBindTexture(GL_TEXTURE_2D,texture);
+    glBindVertexArray(VAO);
+
+    // 创造转变
+    glm::mat4 model         = glm::mat4(1.0f); //确保首先将矩阵初始化为单位矩阵
+    glm::mat4 view          = glm::mat4(1.0f);
+    glm::mat4 projection    = glm::mat4(1.0f);
+    angle += dis;
+    model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+    view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    projection = glm::perspective(glm::radians(45.0f), (float)render->width_ / (float)render->height_, 0.1f, 100.0f);
+    // 检索矩阵统一位置
+    GLint modelLoc = shader->getUniformLocation("model");
+    GLint viewLoc  = shader->getUniformLocation("view");
+    // 将它们传递给着色器（3 种不同的方式）
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+    // 注意：目前我们每帧设置投影矩阵，但由于投影矩阵很少改变，因此最佳实践通常是仅将其设置在主循环之外一次。
+    shader->setMat4("projection", projection);
+
+    // 渲染框
+    glBindVertexArray(VAO);
+
+    glDrawArrays(GL_TRIANGLES,0,36);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    shader->unUse();
 }

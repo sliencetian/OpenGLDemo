@@ -11,5 +11,6 @@
 
 unsigned int loadTexture(struct android_app *app, const char *path);
 
+char* loadAssetFile(AAssetManager *assetManager, const char *path);
 
 #endif //OPENGLDEMO_UTILS_H

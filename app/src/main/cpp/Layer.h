@@ -11,6 +11,7 @@
 #include <GLES3/gl3.h>
 #include "Utils.h"
 #include "Render.h"
+#include "Shader.h"
 
 class Layer {
 
@@ -30,6 +31,8 @@ public:
 
 private:
     bool isInit = false;
+protected:
+    Shader* shader;
 
 };
 
@@ -67,6 +70,7 @@ private:
     float dis = 0.005f;
 
     void init(Render *render) {
+        shader = new Shader(render->app->activity->assetManager,"shader/triangle.vert","shader/triangle.frag");
         // 初始化代码（只运行一次 (除非你的物体频繁改变)）
         float vertices[] = {
                 0.8f, 0.8f, 0.0f,   // 右上角
@@ -105,6 +109,7 @@ public:
     TriangleLayer() {
     }
     ~TriangleLayer(){
+        delete shader;
         glDeleteBuffers(1,&VAO);
         glDeleteBuffers(1,&VBO);
         glDeleteBuffers(1,&VEO);
@@ -122,13 +127,14 @@ private:
     unsigned int VBO = 0, VAO = 0 , EBO = 0;
 
     void init(Render *render) {
+        shader = new Shader(render->app->activity->assetManager,"shader/texture.vert","shader/texture.frag");
         // 初始化代码（只运行一次 (除非你的物体频繁改变)）
         float vertices[] = {
-        //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
-                0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f,   // 右上
-                0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f,   // 右下
-                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   // 左下
-                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   1.0f, 0.0f    // 左上
+                //      ---- 位置 ----                     ---- 颜色 ----               - 纹理坐标 -
+                0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
+                0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+                -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
+                -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
         };
         unsigned int indices[] = {
                 // 注意索引从0开始!
@@ -177,5 +183,93 @@ public:
 
 };
 
+class CubeLayer : public Layer {
+    void handleInput(AInputEvent *event);
+
+    void draw(Render *render);
+
+private:
+    unsigned int texture;
+    unsigned int VBO = 0, VAO = 0 , EBO = 0;
+    float angle = 0.0f;
+    float dis = 0.005f;
+
+    void init(Render *render) {
+        shader = new Shader(render->app->activity->assetManager,"shader/cube.vert","shader/cube.frag");
+        float vertices[] = {
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+                0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+                -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+                -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        };
+        //创建 VAO,VBO
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+//        glGenBuffers(1, &EBO);
+        // 绑定VAO
+        glBindVertexArray(VAO);
+        // 绑定缓冲,填充数据,把顶点数组复制到缓冲中供OpenGL使用
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // 设置 顶点属性
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // 设置 纹理属性
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        //创建纹理
+        texture = loadTexture(render->app,"1.jpeg");
+
+        // 解绑
+        glBindBuffer(GL_ARRAY_BUFFER,0);
+        glBindVertexArray(0);
+    }
+
+public:
+    CubeLayer() {
+    }
+    ~CubeLayer(){
+        glDeleteBuffers(1,&VAO);
+        glDeleteBuffers(1,&VBO);
+    }
+
+};
 
 #endif //OPENGLDEMO_LAYER_H

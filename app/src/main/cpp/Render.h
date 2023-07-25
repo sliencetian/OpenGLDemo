@@ -7,7 +7,6 @@
 
 #include <android_native_app_glue.h>
 #include <EGL/egl.h>
-#include "Shader.h"
 
 class Layer;
 
@@ -23,7 +22,6 @@ public:
             width_(0),
             height_(0) {
         initRenderer(pApp);
-        shader_ = new Shader();
     }
 
     virtual ~Render();
@@ -35,10 +33,6 @@ public:
     void handleInput(AInputEvent *event);
 
     void render();
-
-    Shader* getShader() const {
-        return shader_;
-    }
 
 private:
 
@@ -53,7 +47,6 @@ private:
 public:
     EGLint width_;
     EGLint height_;
-    Shader *shader_;
     android_app *app;
 
 };

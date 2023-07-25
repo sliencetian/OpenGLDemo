@@ -22,6 +22,8 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_o
 file(GLOB LOCAL_SOURCE  "${CMAKE_SOURCE_DIR}/*.cpp")
 file(GLOB LOCAL_HEADER "${CMAKE_SOURCE_DIR}/*.h")
 
+add_subdirectory(glm)
+
 add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         ${LOCAL_HEADERS}
